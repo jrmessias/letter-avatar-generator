@@ -167,7 +167,7 @@ export default function App() {
       ctx.fillRect(0, 0, px, px)
     }
 
-    const txt = (initials || '').trim().toUpperCase().slice(0, 7)
+    const txt = (initials || '').trim().slice(0, 7)
     const computedFont = Math.floor(px * fontSize)
     ctx.fillStyle = textColor
 
@@ -270,7 +270,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -287,7 +287,7 @@ export default function App() {
           <div className="flex flex-col md:flex-row items-start gap-6">
             <div className="flex-shrink-0">
               <div className="w-64 h-64 flex items-center justify-center bg-white dark:bg-slate-700 rounded-md overflow-hidden">
-                <canvas ref={canvasRef} className={`shadow-lg transition-transform duration-150 ${shape === 'round' ? 'rounded-full' : 'rounded-sm'}`} />
+                <canvas ref={canvasRef} className={`transition-transform duration-150 ${shape === 'round' ? 'rounded-full' : 'rounded-sm'}`} />
               </div>
             </div>
 
