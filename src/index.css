@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+button { transition: background-color .12s ease, transform .06s ease; }
+button:active { transform: translateY(1px); }
+input[type='range'] { accent-color: #3b82f6; }
+.toast { transition: opacity .15s ease; }
+
+input[type='range'] {
+  width: 100%;
+  max-width: 100%;
+}
+
+.dark body { background-color: #0b1220 }
+.dark .bg-white { background-color: #0f1724 !important }
+.dark .text-gray-600 { color: #94a3b8 !important }
+.dark .border { border-color: #1f2937 !important }
+
+.dark .toast, .dark .fixed { background-color: #0b1220; color: #e6eef8 }
+
+.dark input, .dark select, .dark textarea, .dark button {
+  color: #e6eef8 !important;
+}
+.dark input::placeholder { color: #94a3b8 !important }
+.dark select option { background-color: #0f1724; color: #e6eef8 }
+.dark .border { border-color: #334155 }
+
+.appearance-section input[type='range'] { display: block; }
+.appearance-section .w-12 { flex: 0 0 auto }
+.appearance-section .flex-wrap { align-items: center }
+
+.appearance-section label { position: relative; z-index: 1 }
+.appearance-section input[type='range'] { position: relative; z-index: 2 }
+.appearance-section input[type='color'] { position: relative; z-index: 1 }
+.appearance-section .mt-1 { margin-top: 0.35rem }
