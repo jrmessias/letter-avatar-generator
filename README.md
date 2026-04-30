@@ -1,6 +1,6 @@
 # Gerador de Avatar com Letras
 
-Aplicação React (Vite) que gera avatares com letras. Permite escolher formato (redondo/quadrado), tamanho, fonte, cor de fundo (sólida ou gradiente), e baixar como PNG ou SVG.
+Aplicação React (Vite 8 + React 19) que gera avatares com letras. Permite escolher formato (redondo/quadrado), tamanho, fonte, cor de fundo (sólida ou gradiente), e baixar como PNG ou SVG.
 
 ## Funcionalidades
 
@@ -41,12 +41,15 @@ Aplicação React (Vite) que gera avatares com letras. Permite escolher formato 
 
 ## Notas técnicas
 
-- **TailwindCSS** para estilos e **lucide-react** para ícones.
+- **Vite 8** com @vitejs/plugin-react para build e dev server ultra-rápido.
+- **React 19** com as últimas funcionalidades.
+- **TailwindCSS 4** com Vite plugin (`@tailwindcss/vite`) para estilos modernos.
+- **lucide-react 1.14** para ícones.
 - O canvas respeita `devicePixelRatio` para exportar imagens PNG nítidas.
 - Quando escolher fontes diferentes de 'Lato', o app injeta a referência do Google Fonts e aguarda o carregamento antes de redesenhar.
 - O SVG gerado inclui o texto com a família de fonte solicitada; se a fonte não estiver disponível no visualizador, usará fallback.
   - Para garantir renderização idêntica em qualquer lugar, incorpore a fonte no SVG (base64) ou converta o texto para paths (não implementado por padrão).
-- **Tema escuro**: usa classe `dark` (Tailwind `darkMode: 'class'`).
+- **Tema escuro**: usa classe `dark` com `@custom-variant` do TailwindCSS 4.
 - **Paletas personalizadas**: salvas no `localStorage` (chave `avatar:palettes`).
 - **Limite de letras**: até 7 caracteres; fonte ajusta automaticamente ao tamanho do avatar.
 
@@ -54,5 +57,5 @@ Aplicação React (Vite) que gera avatares com letras. Permite escolher formato 
 
 - `src/App.jsx` — lógica da UI, canvas, geração SVG, paletas, tema, presets.
 - `src/main.jsx`, `src/index.css` — bootstrap da aplicação e ajustes globais (transições, reset de formulários, tema escuro).
-- `tailwind.config.cjs` — configuração com `darkMode: 'class'`.
+- `vite.config.js` — configuração do Vite com plugins React e TailwindCSS 4.
 - `README.md` — este arquivo.
