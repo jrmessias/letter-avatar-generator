@@ -401,8 +401,8 @@ export default function App() {
                 <button onClick={downloadSVG} className="flex-1 flex items-center gap-2 justify-center px-3 py-2 bg-green-600 text-white rounded-md shadow-sm hover:bg-green-700"><ImageIcon size={14}/> Baixar SVG</button>
               </div>
               <div className="flex gap-2">
-                <button onClick={copySVG} className="flex-1 flex items-center gap-2 justify-center px-3 py-2 border rounded-md border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"><Copy size={14}/> Copiar SVG</button>
                 <button onClick={copyPNG} disabled={!canCopyPNG} className={`flex-1 flex items-center gap-2 justify-center px-3 py-2 border rounded-md border-slate-300 dark:hover:bg-slate-700  ${!canCopyPNG ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50'}`}><Copy size={14}/> Copiar PNG</button>
+                <button onClick={copySVG} className="flex-1 flex items-center gap-2 justify-center px-3 py-2 border rounded-md border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"><Copy size={14}/> Copiar SVG</button>
               </div>
             </div>
           </div>
