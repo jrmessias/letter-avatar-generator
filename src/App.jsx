@@ -14,6 +14,8 @@ export default function App() {
   const [gradColor2, setGradColor2] = useState('#0ea5a4')
   const [gradAngle, setGradAngle] = useState(45)
   const [textOffsetY, setTextOffsetY] = useState(0)
+  const [textOffsetX, setTextOffsetX] = useState(0)
+  const [borderRadius, setBorderRadius] = useState(0)
 
   const [toast, setToast] = useState(null)
 
@@ -72,7 +74,7 @@ export default function App() {
     } else {
       draw()
     }
-   }, [initials, size, fontSize, bgColor, textColor, shape, textOffsetY])
+   }, [initials, size, fontSize, bgColor, textColor, shape, textOffsetY, textOffsetX, borderRadius])
 
   useEffect(() => {
     try {
@@ -164,7 +166,15 @@ export default function App() {
       ctx.closePath()
       ctx.fill()
     } else {
-      ctx.fillRect(0, 0, px, px)
+      if (borderRadius > 0) {
+        const r = (px * borderRadius) / 100
+        ctx.beginPath()
+        ctx.roundRect(0, 0, px, px, r)
+        ctx.closePath()
+        ctx.fill()
+      } else {
+        ctx.fillRect(0, 0, px, px)
+      }
     }
 
     const txt = (initials || '').trim().slice(0, 7)
@@ -175,8 +185,9 @@ export default function App() {
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'center'
 
+    const x = px / 2 + textOffsetX
     const y = px / 2 + textOffsetY
-    ctx.fillText(txt, px / 2, y)
+    ctx.fillText(txt, x, y)
   }
 
   function handleDownload() {
@@ -210,19 +221,19 @@ export default function App() {
       if (shape === 'round') {
         bgShape = `<circle cx="${px/2}" cy="${px/2}" r="${px/2}" fill="url(#g1)" />`
       } else {
-        bgShape = `<rect x="0" y="0" width="${px}" height="${px}" rx="4" fill="url(#g1)"/>`
+        bgShape = `<rect x="0" y="0" width="${px}" height="${px}" rx="${(borderRadius * px) / 100}" fill="url(#g1)"/>`
       }
     } else {
       if (shape === 'round') {
         bgShape = `<circle cx="${px/2}" cy="${px/2}" r="${px/2}" fill="${bgColor}" />`
       } else {
-        bgShape = `<rect x="0" y="0" width="${px}" height="${px}" rx="4" fill="${bgColor}"/>`
+        bgShape = `<rect x="0" y="0" width="${px}" height="${px}" rx="${(borderRadius * px) / 100}" fill="${bgColor}"/>`
       }
     }
 
     const borderElem = ''
 
-    const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns='http://www.w3.org/2000/svg' width='${px}' height='${px}' viewBox='0 0 ${px} ${px}'>\n  <defs>${shadowFilter}${gradDefs}\n  </defs>\n  ${bgShape}\n  ${borderElem}\n  <text x='50%' y='calc(50% + ${textOffsetY}px)' text-anchor='middle' dominant-baseline='middle' fill='${textColor}' font-family="${fontFamily}, system-ui, Arial" font-weight='${fontWeight}' font-size='${fontPx}px'>${txt}</text>\n</svg>`
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns='http://www.w3.org/2000/svg' width='${px}' height='${px}' viewBox='0 0 ${px} ${px}'>\n  <defs>${shadowFilter}${gradDefs}\n  </defs>\n  ${bgShape}\n  ${borderElem}\n  <text x='50%' y='calc(50% + ${textOffsetY}px)' transform='translate(${textOffsetX}, 0)' text-anchor='middle' dominant-baseline='middle' fill='${textColor}' font-family="${fontFamily}, system-ui, Arial" font-weight='${fontWeight}' font-size='${fontPx}px'>${txt}</text>\n</svg>`
     return svg
   }
 
@@ -287,7 +298,7 @@ export default function App() {
           <div className="flex flex-col md:flex-row items-start gap-6">
             <div className="flex-shrink-0">
               <div className="w-64 h-64 flex items-center justify-center bg-white dark:bg-slate-700 rounded-md overflow-hidden">
-                <canvas ref={canvasRef} className={`transition-transform duration-150 ${shape === 'round' ? 'rounded-full' : 'rounded-sm'}`} />
+                <canvas ref={canvasRef} className={`transition-transform duration-150 ${shape === 'round' ? 'rounded-full' : ''}`} style={shape === 'square' ? { borderRadius: `${borderRadius}%` } : {}} />
               </div>
             </div>
 
@@ -345,6 +356,24 @@ export default function App() {
                        <input value={initials} onChange={(e) => setInitials(e.target.value)} placeholder="ABCDEFG" className="mt-1 p-2 border border-slate-300  rounded-md w-full bg-white dark:bg-slate-800 dark:text-white" maxLength={7} />
 
                       <div className="mt-3">
+                        <label className="block text-xs text-slate-600 dark:text-slate-300">Tamanho</label>
+                        <div className="mt-1">
+                          <input className="w-full" type="range" min={64} max={1024} value={size} onChange={(e) => setSize(Number(e.target.value))} />
+                          <div className="text-xs text-slate-500 dark:text-slate-300 mt-1">{size}px</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <label className="block text-xs text-slate-600 dark:text-slate-300">Ajuste Horizontal</label>
+                        <div className="mt-1">
+                          <input className="w-full" type="range" min={-50} max={50} value={textOffsetX} onChange={(e) => setTextOffsetX(Number(e.target.value))} />
+                          <div className="text-xs text-slate-500 dark:text-slate-300 mt-1">{textOffsetX}px</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="mt-0">
                         <label className="block text-xs text-slate-600 dark:text-slate-300">Fonte</label>
                         <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} className="mt-1 p-2 border border-slate-300 rounded-md w-full bg-white dark:bg-slate-800 dark:text-white">
                           <option>Inter</option>
@@ -355,14 +384,6 @@ export default function App() {
                           <option>Lato</option>
                         </select>
                       </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-slate-600 dark:text-slate-300">Tamanho</label>
-                       <div className="mt-1">
-                         <input className="w-full" type="range" min={64} max={1024} value={size} onChange={(e) => setSize(Number(e.target.value))} />
-                         <div className="text-xs text-slate-500 dark:text-slate-300 mt-1">{size}px</div>
-                       </div>
 
                       <div className="mt-3">
                         <label className="block text-xs text-slate-600 dark:text-slate-300">Tamanho da Fonte</label>
@@ -373,7 +394,7 @@ export default function App() {
                       </div>
 
                       <div className="mt-3">
-                        <label className="block text-xs text-slate-600 dark:text-slate-300">Ajuste Vertical (px)</label>
+                        <label className="block text-xs text-slate-600 dark:text-slate-300">Ajuste Vertical</label>
                         <div className="mt-1">
                           <input className="w-full" type="range" min={-50} max={50} value={textOffsetY} onChange={(e) => setTextOffsetY(Number(e.target.value))} />
                           <div className="text-xs text-slate-500 dark:text-slate-300 mt-1">{textOffsetY}px</div>
@@ -386,6 +407,24 @@ export default function App() {
                     <button onClick={() => setShape('square')} className={`px-3 py-2 border border-slate-300 rounded-md flex items-center gap-2 text-slate-700 dark:text-slate-200 ${shape === 'square' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Square size={14}/> Quadrado</button>
                     <button onClick={() => setShape('round')} className={`px-3 py-2 border border-slate-300 rounded-md flex items-center gap-2 text-slate-700 dark:text-slate-200 ${shape === 'round' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Circle size={14}/> Redondo</button>
                   </div>
+                  {shape !== 'square' && (
+                      <div className="mt-6">
+                        <label className="invisible">Arredondamento da Borda</label>
+                        <div className="invisible">
+                          <input className="invisible" />
+                          <div className="invisible mt-1"></div>
+                        </div>
+                      </div>
+                  )}
+                  {shape === 'square' && (
+                    <div className="mt-3">
+                      <label className="block text-xs text-slate-600 dark:text-slate-300">Arredondamento da Borda</label>
+                      <div className="mt-1">
+                        <input className="w-full" type="range" min={0} max={50} value={borderRadius} onChange={(e) => setBorderRadius(Number(e.target.value))} />
+                        <div className="text-xs text-slate-500 dark:text-slate-300 mt-1">{borderRadius}%</div>
+                      </div>
+                    </div>
+                  )}
                 </section>
               </div>
             </div>
@@ -417,7 +456,7 @@ export default function App() {
           </div>
 
           <div className="mt-3 flex flex-col gap-2">
-            <button onClick={() => { setInitials('JD'); setBgColor('#7c3aed'); setTextColor('#ffffff'); setFontSize(0.5); setFontFamily('Lato'); setGradient(false); setGradColor2('#0369a1'); setGradAngle(45); showToast('Reiniciar'); }} className="cursor-pointer flex items-center gap-2 px-3 py-2 border border-slate-300  rounded-md hover:bg-red-300 dark:hover:bg-red-700"><RefreshCw size={14}/> Reiniciar</button>
+            <button onClick={() => { setInitials('JD'); setBgColor('#7c3aed'); setTextColor('#ffffff'); setFontSize(0.5); setFontFamily('Lato'); setGradient(false); setGradColor2('#0369a1'); setGradAngle(45); setTextOffsetX(0); setBorderRadius(0); setShape('round'); showToast('Reiniciar'); }} className="cursor-pointer flex items-center gap-2 px-3 py-2 border border-slate-300  rounded-md hover:bg-red-300 dark:hover:bg-red-700"><RefreshCw size={14}/> Reiniciar</button>
           </div>
 
 
@@ -428,7 +467,7 @@ export default function App() {
         </aside>
 
         <div className="fixed bottom-2 right-4 text-xs text-slate-500">
-          coded by opencode / copilot / big pickle
+          coded with opencode / copilot / big pickle
         </div>
       </div>
     </div>
