@@ -1,11 +1,11 @@
 # Gerador de Avatar com Letras
 
-Aplicação React (Vite 8 + React 19) que gera avatares com letras. Permite escolher formato (redondo/quadrado), tamanho, fonte, cor de fundo (sólida ou gradiente), e baixar como PNG ou SVG.
+Aplicação React (Vite 8 + React 19) que gera avatares com letras. Permite escolher formato (redondo/quadrado/squircle), tamanho, fonte, cor de fundo (sólida ou gradiente), e baixar como PNG ou SVG.
 
 ## Funcionalidades
 
 - **Até 7 letras** no avatar.
-- **Formatos**: Redondo ou Quadrado.
+- **Formatos**: **Squircle** (padrão — superelipse estilo iOS, com curvatura ajustável de `n = 2` (círculo) a `n = 8` (quase quadrado)), Redondo ou Quadrado. Os botões de seleção são exibidos em um grid de 2 colunas, todos com o mesmo tamanho.
 - **Tamanhos**: 64 a 1024 px, com presets rápidos (64, 128, 256, 512, 1024).
 - **Cores**: Seletor de cores com paletas pré-definidas (Verde-azulado, Roxo, Âmbar, Ardósia, Rosa) e **paletas personalizadas** salvas no localStorage.
 - **Gradiente**: Opção de fundo gradiente com escolha da cor secundária e ajuste de ângulo (0-360°).

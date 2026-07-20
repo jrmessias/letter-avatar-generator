@@ -1,5 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Download, Square, Circle, ImageIcon, Copy, Palette, Layers, RefreshCw, Cog, Sun, Moon } from 'lucide-react'
+import { Download, Square, Circle, Squircle, ImageIcon, Copy, Palette, Layers, RefreshCw, Cog, Sun, Moon } from 'lucide-react'
+
+// Pontos de uma superelipse |x/a|^n + |y/a|^n = 1, centrada em (cx, cy).
+// n=2 → círculo, n→∞ → quadrado, iOS ≈ 4. Amostragem paramétrica.
+function squirclePath(cx, cy, a, n, steps = 256) {
+  const pts = []
+  const exp = 2 / n
+  for (let i = 0; i < steps; i++) {
+    const t = (i / steps) * Math.PI * 2
+    const ct = Math.cos(t)
+    const st = Math.sin(t)
+    const x = cx + a * Math.sign(ct) * Math.pow(Math.abs(ct), exp)
+    const y = cy + a * Math.sign(st) * Math.pow(Math.abs(st), exp)
+    pts.push({ x, y })
+  }
+  return pts
+}
+
+// String "d" de um <path> SVG para a mesma superelipse usada no canvas.
+function squircleD(cx, cy, a, n, steps = 256) {
+  const pts = squirclePath(cx, cy, a, n, steps)
+  return pts
+    .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(2)},${p.y.toFixed(2)}`)
+    .join(' ') + ' Z'
+}
 
 export default function App() {
   const [initials, setInitials] = useState('JD')
@@ -7,7 +31,7 @@ export default function App() {
   const [fontSize, setFontSize] = useState(0.5)
   const [bgColor, setBgColor] = useState('#7c3aed')
   const [textColor, setTextColor] = useState('#ffffff')
-  const [shape, setShape] = useState('round')
+  const [shape, setShape] = useState('squircle')
   const [fontFamily, setFontFamily] = useState('Lato')
   const fontWeight = 600
   const [gradient, setGradient] = useState(false)
@@ -16,6 +40,7 @@ export default function App() {
   const [textOffsetY, setTextOffsetY] = useState(0)
   const [textOffsetX, setTextOffsetX] = useState(0)
   const [borderRadius, setBorderRadius] = useState(0)
+  const [squircleN, setSquircleN] = useState(4)
 
   const [toast, setToast] = useState(null)
 
@@ -74,7 +99,7 @@ export default function App() {
     } else {
       draw()
     }
-   }, [initials, size, fontSize, bgColor, textColor, shape, textOffsetY, textOffsetX, borderRadius])
+   }, [initials, size, fontSize, bgColor, textColor, shape, textOffsetY, textOffsetX, borderRadius, squircleN])
 
   useEffect(() => {
     try {
@@ -165,6 +190,12 @@ export default function App() {
       ctx.arc(px / 2, px / 2, px / 2, 0, Math.PI * 2)
       ctx.closePath()
       ctx.fill()
+    } else if (shape === 'squircle') {
+      const pts = squirclePath(px / 2, px / 2, px / 2, squircleN)
+      ctx.beginPath()
+      pts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)))
+      ctx.closePath()
+      ctx.fill()
     } else {
       if (borderRadius > 0) {
         const r = (px * borderRadius) / 100
@@ -220,12 +251,16 @@ export default function App() {
       gradDefs = `\n    <linearGradient id="g1" x1="${x0}%" y1="${y0}%" x2="${x1}%" y2="${y1}%">\n      <stop offset="0%" stop-color="${bgColor}"/>\n      <stop offset="100%" stop-color="${gradColor2}"/>\n    </linearGradient>`
       if (shape === 'round') {
         bgShape = `<circle cx="${px/2}" cy="${px/2}" r="${px/2}" fill="url(#g1)" />`
+      } else if (shape === 'squircle') {
+        bgShape = `<path d="${squircleD(px / 2, px / 2, px / 2, squircleN)}" fill="url(#g1)"/>`
       } else {
         bgShape = `<rect x="0" y="0" width="${px}" height="${px}" rx="${(borderRadius * px) / 100}" fill="url(#g1)"/>`
       }
     } else {
       if (shape === 'round') {
         bgShape = `<circle cx="${px/2}" cy="${px/2}" r="${px/2}" fill="${bgColor}" />`
+      } else if (shape === 'squircle') {
+        bgShape = `<path d="${squircleD(px / 2, px / 2, px / 2, squircleN)}" fill="${bgColor}"/>`
       } else {
         bgShape = `<rect x="0" y="0" width="${px}" height="${px}" rx="${(borderRadius * px) / 100}" fill="${bgColor}"/>`
       }
@@ -403,11 +438,12 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="mt-3 flex items-center gap-2">
-                    <button onClick={() => setShape('square')} className={`px-3 py-2 border border-slate-300 rounded-md flex items-center gap-2 text-slate-700 dark:text-slate-200 ${shape === 'square' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Square size={14}/> Quadrado</button>
-                    <button onClick={() => setShape('round')} className={`px-3 py-2 border border-slate-300 rounded-md flex items-center gap-2 text-slate-700 dark:text-slate-200 ${shape === 'round' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Circle size={14}/> Redondo</button>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <button onClick={() => setShape('square')} className={`justify-center px-3 py-2 border border-slate-300 rounded-md flex items-center gap-2 text-slate-700 dark:text-slate-200 ${shape === 'square' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Square size={14}/> Quadrado</button>
+                    <button onClick={() => setShape('round')} className={`justify-center px-3 py-2 border border-slate-300 rounded-md flex items-center gap-2 text-slate-700 dark:text-slate-200 ${shape === 'round' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Circle size={14}/> Redondo</button>
+                    <button onClick={() => setShape('squircle')} className={`justify-center px-3 py-2 border border-slate-300 rounded-md flex items-center gap-2 text-slate-700 dark:text-slate-200 ${shape === 'squircle' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}><Squircle size={14}/> Squircle</button>
                   </div>
-                  {shape !== 'square' && (
+                  {shape === 'round' && (
                       <div className="mt-6">
                         <label className="invisible">Arredondamento da Borda</label>
                         <div className="invisible">
@@ -422,6 +458,15 @@ export default function App() {
                       <div className="mt-1">
                         <input className="w-full" type="range" min={0} max={50} value={borderRadius} onChange={(e) => setBorderRadius(Number(e.target.value))} />
                         <div className="text-xs text-slate-500 dark:text-slate-300 mt-1">{borderRadius}%</div>
+                      </div>
+                    </div>
+                  )}
+                  {shape === 'squircle' && (
+                    <div className="mt-3">
+                      <label className="block text-xs text-slate-600 dark:text-slate-300">Curvatura</label>
+                      <div className="mt-1">
+                        <input className="w-full" type="range" min={2} max={8} step={0.1} value={squircleN} onChange={(e) => setSquircleN(Number(e.target.value))} />
+                        <div className="text-xs text-slate-500 dark:text-slate-300 mt-1">n = {squircleN.toFixed(1)} <span className="text-slate-400">(2 = círculo · 8 ≈ quadrado)</span></div>
                       </div>
                     </div>
                   )}
@@ -456,7 +501,7 @@ export default function App() {
           </div>
 
           <div className="mt-3 flex flex-col gap-2">
-            <button onClick={() => { setInitials('JD'); setBgColor('#7c3aed'); setTextColor('#ffffff'); setFontSize(0.5); setFontFamily('Lato'); setGradient(false); setGradColor2('#0369a1'); setGradAngle(45); setTextOffsetX(0); setBorderRadius(0); setShape('round'); showToast('Reiniciar'); }} className="cursor-pointer flex items-center gap-2 px-3 py-2 border border-slate-300  rounded-md hover:bg-red-300 dark:hover:bg-red-700"><RefreshCw size={14}/> Reiniciar</button>
+            <button onClick={() => { setInitials('JD'); setBgColor('#7c3aed'); setTextColor('#ffffff'); setFontSize(0.5); setFontFamily('Lato'); setGradient(false); setGradColor2('#0369a1'); setGradAngle(45); setTextOffsetX(0); setBorderRadius(0); setSquircleN(4); setShape('squircle'); showToast('Reiniciar'); }} className="cursor-pointer flex items-center gap-2 px-3 py-2 border border-slate-300  rounded-md hover:bg-red-300 dark:hover:bg-red-700"><RefreshCw size={14}/> Reiniciar</button>
           </div>
 
 
