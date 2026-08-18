@@ -314,6 +314,29 @@ export default function App() {
     URL.revokeObjectURL(url)
   }
 
+  const contactRef = useRef(null)
+
+  async function sendContact(e) {
+    e.preventDefault()
+    const form = e.target
+    const data = Object.fromEntries(new FormData(form))
+    data.access_key = 'e654b2db-d356-4490-8234-c6a3e2e26116'
+    data.subject = 'Contato - Gerador de Avatar com Letras'
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) throw new Error(res.status)
+      form.reset()
+      contactRef.current.close()
+      showToast('Mensagem enviada')
+    } catch {
+      showToast('Falha ao enviar mensagem', 'error')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex items-center justify-center p-6">
       <div className="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -510,6 +533,24 @@ export default function App() {
           )}
 
         </aside>
+
+        <footer className="md:col-span-3 border-t border-slate-200 dark:border-slate-700 pt-3 text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center justify-between gap-2">
+          <span>Desenvolvido por <a href="https://jrmessias.com.br/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600 dark:hover:text-blue-400">Israel Messias Júnior</a></span>
+          <button onClick={() => contactRef.current.showModal()} className="cursor-pointer underline hover:text-blue-600 dark:hover:text-blue-400">Vamos fazer um projeto?</button>
+
+          <dialog ref={contactRef} className="backdrop:bg-black/50 m-auto w-[min(92vw,26rem)] rounded-xl p-6 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+            <div className="flex items-start justify-between gap-4">
+              <h3 className="text-lg font-semibold">Vamos fazer um projeto?</h3>
+              <button onClick={() => contactRef.current.close()} aria-label="Fechar" className="cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
+            </div>
+            <form onSubmit={sendContact} className="mt-4 flex flex-col gap-2 text-sm">
+              <input name="name" required placeholder="Seu nome" className="px-2 py-2 border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700" />
+              <input name="email" type="email" required placeholder="Seu e-mail" className="px-2 py-2 border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700" />
+              <textarea name="message" required rows={4} placeholder="Conte sobre o projeto" className="px-2 py-2 border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700" />
+              <button type="submit" className="cursor-pointer px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Enviar</button>
+            </form>
+          </dialog>
+        </footer>
       </div>
     </div>
   )
